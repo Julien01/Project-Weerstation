@@ -6,7 +6,7 @@
 cd <mydevdir>
 git clone https://github.com/Julien01/Project-Weerstation.git
 ```
-
+//hoi
 
 ## issues
 

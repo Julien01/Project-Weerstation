@@ -1,0 +1,63 @@
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
+#include <QDebug>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QVariant>
+
+
+void connectToDatabase() {
+    // Maak een verbinding met de SQLite-database
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+    db.setHostName("127.0.0.1");
+    db.setPort(3306);
+    db.setUserName("root");
+    db.setPassword("");
+    db.setDatabaseName("projectweerstation"); // Geef het pad naar je databasebestand op
+
+    // Open de databaseverbinding
+    if (!db.open()) {
+        qDebug() << "Error: Unable to open database." << db.lastError().text();
+        return;
+    }
+    qDebug() << "Database connected!";
+}
+
+void fetchData(){
+QSqlQuery query("SELECT * FROM test");
+
+    if (!query.exec()) {
+     qDebug() << "Query execution error: " << query.lastError().text();
+     return;
+    }
+
+    if (query.next()) { // Move to the first (and only) row returned
+        QVariant firstValue = query.value(0); // Get the first column's value
+        qDebug() << "First value in the first column:" << firstValue;
+    }
+}
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+
+    QQmlApplicationEngine engine;
+
+    qInfo() << QSqlDatabase::drivers();
+
+    connectToDatabase();
+    fetchData();
+
+    QObject::connect(
+        &engine,
+        &QQmlApplicationEngine::objectCreationFailed,
+        &app,
+        []() { QCoreApplication::exit(-1); },
+        Qt::QueuedConnection);
+    engine.loadFromModule("LaatsteWeerstation", "Main");
+
+    return app.exec();
+}

@@ -40,16 +40,43 @@ QSqlQuery query("SELECT * FROM test");
         qDebug() << "First value in the first column:" << firstValue;
     }
 }
+
+void insertValue(){
+    QSqlQuery query;
+    query.prepare("INSERT INTO test (getal) VALUES (:value)");
+    query.bindValue(":value", 4);
+
+    if (!query.exec()) {
+        qDebug() << "Insert error:" << query.lastError().text();
+    } else {
+        qDebug() << "Value inserted successfully!";
+    }
+}
+
+void updateValue(){
+    QSqlQuery query;
+    query.prepare("UPDATE test SET Getal = :newValue WHERE id = :id");
+    query.bindValue(":newValue", 69);
+    query.bindValue(":id", 2);
+
+    if (!query.exec()) {
+        qDebug() << "Update error:" << query.lastError().text();
+    } else {
+        qDebug() << "Value updated successfully!";
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
 
-    qInfo() << QSqlDatabase::drivers();
-
     connectToDatabase();
-    fetchData();
+    //fetchData();
+    //insertValue();
+    //updateValue();
 
     QObject::connect(
         &engine,

@@ -1,0 +1,18 @@
+&i2c1 {
+    status = "okay";
+    bme280@76 {
+        compatible = "bosch,bme280";
+        reg = <0x76>;  // Make sure this matches your sensor's I2C address
+        label = "BME280";
+    };
+};
+
+&usart1 {
+
+	status = "okay";
+    compatible = "st,stm32-usart", "st,stm32-uart";
+    pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>; // TX on PB6, RX on PB7
+    pinctrl-names = "default"; // Default pin control setting
+    current-speed = <115200>; // Baud rate
+    
+};

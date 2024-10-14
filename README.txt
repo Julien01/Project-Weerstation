@@ -10,3 +10,18 @@ New Features:
 
     ESP8266 Integration: The ESP8266 module communicates with the BME-280 sensor, via the nucleo f091rc, to collect weather data and sends this data to the database via Wi-Fi.
     The database, web server, and ESP8266 code have been successfully implemented and can now be used together. Simply connect the ESP8266 to the BME-280 sensor and the stm32, deploy the web server, and ensure the database is running. The weather data will flow from the ESP8266 to the database and be viewable on the web interface.
+
+    The development until now has been done with a trunk-based approach, using seperate feature breanches, each for a seperate feature.
+
+    The following user stories were implemented in this version:
+
+    - Sensor usage
+    - measurements per minute
+    - Wireless
+    - Hardware essentials
+    - C/C++ language
+    - Zephyr
+    - esp8266 module
+
+    Further, the release document is included within the repository.
+

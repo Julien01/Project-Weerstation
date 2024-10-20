@@ -37,7 +37,7 @@ void read_bme280_data(void)
     // Retrieve temperature, humidity, and pressure values
     sensor_channel_get(bme280_dev, SENSOR_CHAN_AMBIENT_TEMP, &temp);
     sensor_channel_get(bme280_dev, SENSOR_CHAN_HUMIDITY, &hum);
-    sensor_channel_get(bme280_dev, SENSOR_CHAN_PRESS, &press);
+    sensor_channel_get(bme280_dev, SENSOR_CHAN_PRESS, &press) * 1000; // convert to milliPascal
 
     // Convert + store values
     k_mutex_lock(&temp_mutex, K_FOREVER);
@@ -47,7 +47,7 @@ void read_bme280_data(void)
     k_mutex_unlock(&temp_mutex);
 }
 
-/* Function to send sensor data to the web server */
+// Function to send sensor data to the web server
 void send_sensor_data(void)
 {
     char data_to_send[100];
@@ -55,7 +55,7 @@ void send_sensor_data(void)
 
     // Prepare sensor data string 
     k_mutex_lock(&temp_mutex, K_FOREVER);
-    sprintf(data_to_send, "Temp=%d&Humidity=%d&Pressure=%d&UID=%s", 
+    sprintf(data_to_send, "Temp=%d °C&Humidity=%d %&Pressure=%d mPa&UID=%s", 
             temperature, humidity, pressure, uid);
     k_mutex_unlock(&temp_mutex);
 
@@ -95,12 +95,12 @@ void main(void)
     k_sleep(K_MSEC(11000));
 
     // Start TCP connection
-    print_uart("AT+CIPSTART=\"TCP\",\"195.201.2.165\",80\r\n");
+    print_uart("AT+CIPSTART=\"TCP\",\"//yourwebserver\",80\r\n"); // correct webserver
     k_sleep(K_MSEC(6000));
 
     while (1) {
         read_bme280_data();
         send_sensor_data();
-        k_sleep(K_MSEC(58000));
+        k_sleep(K_MSEC(58000)); 
     }
 }

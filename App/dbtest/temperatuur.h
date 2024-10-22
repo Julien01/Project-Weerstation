@@ -22,10 +22,12 @@ public:
 
 private slots:
     void on_pushButton_clicked();
+    void updateModel();
 
 
 private:
     Ui::temperatuur *ui;
+    QTimer *updateTimer;
 };
 
 #endif // TEMPERATUUR_H

@@ -26,7 +26,15 @@ private slots:
 
     void on_pushButton_4_clicked();
 
+    void on_pushButton_5_clicked();
+
+    void updateModel();
+
+
+
+
 private:
     Ui::MainWindow *ui;
+    QTimer *updateTimer;
 };
 #endif // MAINWINDOW_H

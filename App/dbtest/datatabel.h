@@ -17,9 +17,11 @@ public:
 
 private slots:
     void on_pushButton_clicked();
+    void updateModel();
 
 private:
     Ui::DataTabel *ui;
+    QTimer *updateTimer;
 };
 
 #endif // DATATABEL_H

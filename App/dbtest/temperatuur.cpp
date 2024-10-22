@@ -11,15 +11,21 @@
 #include <QtCharts/QDateTimeAxis>
 #include <QBoxLayout>
 #include <QDateTime>
+#include <QTimer>
 
 temperatuur::temperatuur(QWidget *parent)
     : QDialog(parent), ui(new Ui::temperatuur)
 {
     ui->setupUi(this);
 
-    // Model instellen voor de tabel 'temperature'
+    this->setFixedSize(1200,550);
+    this->setWindowTitle("Temperatuur");
+
+    // Model instellen voor de tabel 'metingen'
     QSqlTableModel *model = new QSqlTableModel(this);
-    model->setTable("temperature");
+    model->setTable("metingen");
+    //model->setFilter("tijd >= NOW() - INTERVAL 1 DAY"); nu en 24 uur geleden
+    model->setFilter("tijd >= (SELECT MAX(tijd) FROM metingen) - INTERVAL 1 DAY"); //vanaf laatste meting tot 24 uur geleden
     model->select(); // Laad alle gegevens
 
     ui->Temp->setModel(model);
@@ -33,13 +39,13 @@ temperatuur::temperatuur(QWidget *parent)
     model->setHeaderData(1, Qt::Horizontal, tr("Temperatuur"));
     ui->Temp->setColumnWidth(4, 170); // Maak tijdstip kolom breder
 
-    // Maak een apart model voor de tweede tabel
+    // Maak een apart model voor de label
     QSqlTableModel *model2 = new QSqlTableModel(this);
-    model2->setTable("temperature");
-    model2->setFilter("tijd = (SELECT MAX(tijd) FROM temperature)"); // Filter voor max tijd
+    model2->setTable("metingen");
+    model2->setFilter("tijd = (SELECT MAX(tijd) FROM metingen)"); // Filter voor max tijd
     model2->select(); // Laad gegevens met filter
 
-    QString latestDate = model2->data(model2->index(0, 4)).toString(); // Neem de geformatteerde datum
+    QString latestDate = model2->data(model2->index(0, 4)).toString(); // Neem de max datum
     ui->labeldate->setText(latestDate); // Stel de tekst van een QLabel in
 
 
@@ -47,10 +53,15 @@ temperatuur::temperatuur(QWidget *parent)
 
     // Vul de series met data uit het model van de eerste tabel
     for (int row = 0; row < model->rowCount(); ++row) {
-        double temperature = model->data(model->index(row, 1)).toDouble(); // Temperatuur
-        QDateTime timestamp = model->data(model->index(row, 4)).toDateTime(); // Tijdstip
+        QString tempString = model->data(model->index(row, 1)).toString().trimmed();
+        tempString = tempString.split(" ").first(); // Haal alleen het numerieke deel voor de "°C"
 
-        series->append(timestamp.toMSecsSinceEpoch(), temperature); // Voeg waarden toe
+        bool ok;
+        double temperature = tempString.toDouble(&ok);
+
+        QDateTime timestamp = model->data(model->index(row, 4)).toDateTime(); // Tijdstip
+        series->append(timestamp.toMSecsSinceEpoch(), temperature);
+
     }
 
     // Maak een grafiek en voeg de serie toe
@@ -83,8 +94,20 @@ temperatuur::temperatuur(QWidget *parent)
     chartview->setVisible(true);
 
     ui->verticalLayout->addWidget(chartview);
+
+    // Stel een QTimer in om de tabel regelmatig te verversen
+    updateTimer = new QTimer(this);
+    connect(updateTimer, &QTimer::timeout, this, &temperatuur::updateModel);
+    updateTimer->start(5000); // Ververs elke 5 sec
 }
 
+void temperatuur::updateModel()
+{
+    QSqlTableModel *model = qobject_cast<QSqlTableModel *>(ui->Temp->model());
+    if (model) {
+        model->select(); // Vernieuw het model om nieuwe gegevens op te halen
+    }
+}
 
 temperatuur::~temperatuur()
 {
